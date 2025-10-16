@@ -1,0 +1,16 @@
+# Runtime artifacts
+logs/
+vault-agent/output/
+vault-agent/agent.pid
+vault-agent/approle/role_id
+vault-agent/approle/secret_id
+
+# Python
+__pycache__/
+*.pyc
+
+# Docker
+.env
+
+# Misc
+.DS_Store
