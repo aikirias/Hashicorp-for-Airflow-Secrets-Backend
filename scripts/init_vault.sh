@@ -80,12 +80,13 @@ vault write auth/approle/role/airflow-agent \
   token_policies="airflow-agent" \
   token_ttl="2m" \
   token_max_ttl="10m" \
-  secret_id_ttl="2m" \
+  secret_id_ttl="60m" \
   secret_id_num_uses=0 >/dev/null
 
 log "exporting approle credentials for vault agent"
 mkdir -p /vault-agent/approle
 vault read -field=role_id auth/approle/role/airflow-agent/role-id >/vault-agent/approle/role_id
 vault write -f -field=secret_id auth/approle/role/airflow-agent/secret-id >/vault-agent/approle/secret_id
+chmod 0644 /vault-agent/approle/* >/dev/null 2>&1 || true
 
 log "Vault bootstrap complete"
