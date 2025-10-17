@@ -59,7 +59,7 @@ path "database/creds/airflow-dynamic-read" {
 }
 
 path "secret/data/airflow/connections/*" {
-  capabilities = ["read"]
+  capabilities = ["read", "update"]
 }
 
 path "secret/data/airflow/variables/dynamic_db_credentials" {

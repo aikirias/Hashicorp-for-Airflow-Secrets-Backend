@@ -62,6 +62,7 @@
 | `vault_kv_connections_and_variables` | Demostrar variables y conexiones desde KV | Usa `Variable.get("sample_message")` y `postgres_conn_id="kv_postgres"` (únicamente definido en Vault). |
 | `vault_agent_dynamic_kv` | Consumir credenciales publicadas por el Vault Agent | Lee `dynamic_db_credentials` (JSON) y se conecta con `psycopg2`. |
 | `vault_dynamic_connection_sql` | Generar un `conn_id` dinámico antes de ejecutar SQL | Llama a `lib.vault_utils.provision_dynamic_sql_connection()`, que pide credenciales dinámicas, arma el URI desde el KV y registra la conexión en el metastore. |
+| `vault_agent_conn_id` | Usar el conn_id sincronizado por el Vault Agent | El agente actualiza `secret/airflow/connections/vault_agent_postgres`; el DAG usa ese `conn_id` directamente y registra la credencial vigente en logs. |
 
 ### Utilidades Python (`dags/lib/vault_utils.py`)
 - Envoltorio alrededor de `hvac` para:

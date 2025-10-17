@@ -31,6 +31,7 @@ Los DAGs de interés:
 - `vault_kv_connections_and_variables`
 - `vault_agent_dynamic_kv`
 - `vault_dynamic_connection_sql`
+- `vault_agent_conn_id`
 
 ### Rotación de Credenciales
 - TTL configurado: `2m` (`scripts/init_vault.sh`).

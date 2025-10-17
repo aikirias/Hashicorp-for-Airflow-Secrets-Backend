@@ -83,6 +83,11 @@ El Vault Agent utiliza un `template` (`vault-agent/templates/db-creds.tpl`) para
    - El `SQLExecuteQueryOperator` recibe el `conn_id` devuelto por la función sin persistir
      manualmente credenciales en Airflow.
 
+4. **`vault_agent_conn_id`** (`dags/vault_agent_conn_id_dag.py`)
+   - Usa la variable `dynamic_db_credentials` para registrar los metadatos actuales.
+   - Ejecuta un `SQLExecuteQueryOperator` con `conn_id="vault_agent_postgres"`, que el Vault Agent
+     mantiene actualizado directamente en `secret/airflow/connections`.
+
 Cada DAG se ejecuta bajo demanda (sin schedule) para facilitar las pruebas manuales.
 
 ## Datos de ejemplo
