@@ -1,19 +1,12 @@
-"""
-DAG que consume un secreto dinámico generado por Vault Agent y almacenado en el KV.
-
-El agente obtiene credenciales temporales del motor database/ y las publica en
-secret/data/airflow/variables/dynamic_db_credentials. Este DAG las lee y ejecuta
-una consulta real usando psycopg2.
-"""
+"""DAG que consume las credenciales dinámicas publicadas por Vault Agent en el KV."""
 
 from __future__ import annotations
 
 import logging
-from contextlib import closing
 
-import psycopg2
 from airflow.decorators import dag, task
 from airflow.models import Variable
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.utils.dates import days_ago
 
 
@@ -24,11 +17,11 @@ from airflow.utils.dates import days_ago
     catchup=False,
     tags=["hashicorp", "vault", "vault-agent"],
 )
-def vault_agent_dynamic_kv():
-    """Consume credenciales de corta duración publicadas por Vault Agent."""
+def vault_agent_dynamic_kv() -> None:
+    """Lee el payload del KV y ejecuta la consulta reutilizando el conn_id dinámico."""
 
-    @task(task_id="obtener_credenciales")
-    def obtener_credenciales() -> dict:
+    @task(task_id="registrar_credenciales")
+    def registrar_credenciales() -> None:
         payload = Variable.get("dynamic_db_credentials", deserialize_json=True)
         logging.info(
             "Vault Agent entregó usuario=%s lease_id=%s con TTL=%s",
@@ -36,27 +29,17 @@ def vault_agent_dynamic_kv():
             payload.get("lease_id"),
             payload.get("lease_duration"),
         )
-        return payload
 
-    @task(task_id="consultar_inventario")
-    def consultar_inventario(credenciales: dict) -> int:
-        with closing(
-            psycopg2.connect(
-                host="demo-db",
-                port=5432,
-                dbname="demo",
-                user=credenciales["username"],
-                password=credenciales["password"],
-            )
-        ) as conn:
-            with conn, conn.cursor() as cur:
-                cur.execute("SELECT SUM(in_stock) FROM inventory;")
-                total = cur.fetchone()[0]
-                logging.info("Total de unidades en inventario (Vault Agent): %s", total)
-                return total
+    ejecutar_consulta = SQLExecuteQueryOperator(
+        task_id="ejecutar_consulta_sql",
+        conn_id="vault_agent_postgres",
+        sql="""
+        SELECT SUM(in_stock) AS total_inventario
+        FROM inventory;
+        """,
+    )
 
-    credenciales = obtener_credenciales()
-    consultar_inventario(credenciales)
+    registrar_credenciales() >> ejecutar_consulta
 
 
 dag = vault_agent_dynamic_kv()

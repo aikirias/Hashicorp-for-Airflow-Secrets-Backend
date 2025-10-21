@@ -102,6 +102,3 @@ Para detener y eliminar contenedores y volúmenes:
 ```bash
 docker compose down -v
 ```
-
-> **Nota:** Vault corre en modo dev. Para producción deberían configurarse storage,
-> políticas, autenticación (AppRole/JWT/Kubernetes), rotación de tokens y cifrado adecuados.
